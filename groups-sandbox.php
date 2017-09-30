@@ -30,7 +30,7 @@ class Groups_Sandbox {
 	 * Hooked on the plugins_loaded action.
 	 */
 	public static function plugins_loaded() {
-		add_shortcode( 'groups_sandbox_posts', 'groups_sandbox_posts' );
+		add_shortcode( 'groups_sandbox_posts', array( __CLASS__, 'groups_sandbox_posts' ) );
 	}
 
 	/**
@@ -84,35 +84,52 @@ class Groups_Sandbox {
 		}
 
 		$args = array(
-				'field'            => 'id',
-				'numberposts'      => $numberposts,
-				'order'            => $order,
-				'orderby'          => $orderby,
-				'post_type'        => $post_type,
-				'post_status'      => $post_status,
-				'suppress_filters' => $suppress_filters
+			'field'            => 'id',
+			'numberposts'      => $numberposts,
+			'order'            => $order,
+			'orderby'          => $orderby,
+			'post_type'        => $post_type,
+			'post_status'      => $post_status,
+			'suppress_filters' => $suppress_filters
 		);
 
 		if ( count( $group_ids ) > 0 ) {
-			$args['meta_key']   = Groups_Post_Access::POSTMETA_PREFIX . Groups_Post_Access::READ;
-			$args['meta_value'] = $group_ids;
+			if ( count( $group_ids ) > 1 ) {
+				$args['meta_query'] = array(
+					array(
+						'key'     => Groups_Post_Access::POSTMETA_PREFIX . Groups_Post_Access::READ,
+						'value'   => $group_ids,
+						'compare' => 'IN'
+					)
+				);
+			} else {
+				$args['meta_key']   = Groups_Post_Access::POSTMETA_PREFIX . Groups_Post_Access::READ;
+				$args['meta_value'] = array_shift( $group_ids );
+			}
 		}
 
 		$post_ids = get_posts( $args );
 		if ( count( $post_ids ) > 0 ) {
-			$entries = array( '<ul>' );
+			$entries = array();
 			foreach( $post_ids as $post_id ) {
-				$url = get_permalink( $post_id );
-				$title = get_the_title( $post_id );
-				$entries[] = sprintf(
-						'<li><a href="%s" title="%s">%s</a></li>',
+				$url       = get_permalink( $post_id );
+				$title     = get_the_title( $post_id );
+				$entries[] = apply_filters(
+					'groups_sandbox_posts_item',
+					sprintf(
+						'<li class="groups-sandbox-posts-item"><a href="%s" title="%s">%s</a></li>',
 						esc_url( $url ),
 						esc_attr( $title ),
 						esc_html( $title )
-						);
+					),
+					$args,
+					$post_ids
+				);
 			}
-			$entries[] = '</ul>';
-			$result = implode( '', $entries );
+			$result =
+				apply_filters( 'groups_sandbox_posts_prefix', '<ul class="groups-sandbox-posts">', $args, $post_ids ) .
+				implode( apply_filters( 'groups_sandbox_posts_separator', "\n", $args, $post_ids ), $entries ) .
+				apply_filters( 'groups_sandbox_posts_suffix', '</ul>', $args, $post_ids );
 		}
 		return $result;
 	}

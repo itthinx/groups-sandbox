@@ -27,8 +27,27 @@ It accepts these attribtues:
 - post_status : one or more post statuses separated by comma; defaults to 'publish'
 - suppress_filters : 'yes' or 'no', defaults to 'no' - set to 'yes' if you want to include posts that are restricted and the current user is not allowed to see see them
 
-== Example ==
+== Examples ==
 
-Put this shortcode on a page and view it on the front end :
+Put these shortcodes on a page, save it and view it on the front end.
+View it while logged out and compare the output while logged in and belonging to the relevant groups:
 
-`[groups_sandbox_posts group="Registered,Premium" suppress_filters="no"]`
+a) With no attributes:
+
+	[groups_sandbox_posts]
+
+b) Showing posts restricted to the "Registered" group:
+
+	[groups_sandbox_posts group="Registered" suppress_filters="no"]
+
+The same thing but skipping filters - visitors who are not logged in or don't have an account will also see the links:
+
+	[groups_sandbox_posts group="Registered" suppress_filters="yes"]
+
+c) Using a couple of group, "Test, Secret" :
+
+	[groups_sandbox_posts group="Test,Secret" suppress_filters="no"]
+
+Using groups="Test, Secret" and suppress_filters="yes":
+
+	[groups_sandbox_posts group="Test,Secret" suppress_filters="yes"]
