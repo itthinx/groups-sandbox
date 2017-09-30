@@ -30,7 +30,9 @@ class Groups_Sandbox {
 	 * Hooked on the plugins_loaded action.
 	 */
 	public static function plugins_loaded() {
-		add_shortcode( 'groups_sandbox_posts', array( __CLASS__, 'groups_sandbox_posts' ) );
+		if ( defined( 'GROUPS_CORE_VERSION' ) ) {
+			add_shortcode( 'groups_sandbox_posts', array( __CLASS__, 'groups_sandbox_posts' ) );
+		}
 	}
 
 	/**
